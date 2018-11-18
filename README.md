@@ -4,5 +4,5 @@ Nocturne 1
 Dépôt avec notre code de la 1ère nocturne
 
 - [x] Bras
-- [ ] Ascenseur
-- [ ] Contrôle de la pompe
+- [x] Ascenseur
+- [x] Contrôle de la pompe
