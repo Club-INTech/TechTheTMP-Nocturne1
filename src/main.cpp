@@ -2,6 +2,7 @@
 #include "DynamixelUtils.h"
 #include "DynamixelManager.h"
 #include "XL430.h"
+#include "SyncWrite.h"
 #include <vector>
 
 #define _GLIBCXX_USE_C99 1
@@ -15,7 +16,11 @@ static XL430* motor3 = new XL430(3,*manager);
 
 static std::vector<XL430*> motors{motor1,motor2,motor3};
 
+static char* syncAngles = new char[XL430::xl430GoalAngle.length*3];
+static SyncWrite* syncWriteData = new SyncWrite(*manager, 3, (uint16_t ) (XL430::xl430GoalAngle.address[0] | (XL430::xl430GoalAngle.address[1] << 8)), XL430::xl430GoalAngle.length);
 
+
+#ifndef TEST_MOTOR
 // Pins pour l'ascenseur
 const uint8_t STEP_PIN = 2; // Vitesse
 const uint8_t RST_PIN = 3; // Reset
@@ -24,6 +29,7 @@ const unsigned int ELEVATOR_TEMPO = 800; //gris
 
 // Pompe
 const uint8_t PUMP_PIN = 5;
+#endif
 
 
 void setup()
@@ -35,18 +41,24 @@ void setup()
 
     digitalWrite(13, HIGH); // led de débug
 
+#ifndef TEST_MOTOR
+    // Préparation de l'ascenseur
     pinMode(DIR_PIN, OUTPUT);
     pinMode(STEP_PIN, OUTPUT);
     pinMode(RST_PIN, OUTPUT);
-    digitalWrite(RST_PIN, HIGH);
 
+    // Préparation du MOSFET pour la pompe
+    pinMode(PUMP_PIN, OUTPUT);
+    digitalWrite(RST_PIN, HIGH);
+#endif
     // les moteurs fournissent du couple
     motor1->toggleTorque(true);
     motor2->toggleTorque(true);
     motor3->toggleTorque(true);
 
-    // Préparation du MOSFET pour la pompe
-    pinMode(PUMP_PIN, OUTPUT);
+    syncWriteData->setMotorID(0, 1);
+    syncWriteData->setMotorID(1, 2);
+    syncWriteData->setMotorID(2, 3);
 
     Serial.println("Ready :)");
     delay(1000);
@@ -54,17 +66,36 @@ void setup()
     digitalWrite(13, LOW);
 }
 
+void prepareAngleData(unsigned int motorIndex, float angle)
+{
+    uint32_t targetAngleValue = (uint32_t)(angle/0.088);
+    char* parameter = &syncAngles[motorIndex*4];
+
+    for(int i = 0;i<XL430::xl430GoalAngle.length;i++)
+    {
+        parameter[i] = targetAngleValue & 0xFF;
+        targetAngleValue = targetAngleValue >> 8;
+    }
+}
 
 // Permet de positionner le bras dans une position donnée
 void setpos(float firstMotor, float secondMotor, float thirdMotor)
 {
-    Serial.println(motors.at(0)->setGoalAngle(firstMotor));
+    prepareAngleData(0, firstMotor);
+    prepareAngleData(1, secondMotor);
+    prepareAngleData(2, thirdMotor);
+    syncWriteData->setData(0, &syncAngles[0]);
+    syncWriteData->setData(1, &syncAngles[1*4]);
+    syncWriteData->setData(2, &syncAngles[2*4]);
+    syncWriteData->send();
+    /*Serial.println(motors.at(0)->setGoalAngle(firstMotor));
     delay(100);
     Serial.println(motors.at(1)->setGoalAngle(secondMotor));
     delay(100);
-    Serial.println(motors.at(2)->setGoalAngle(thirdMotor));
+    Serial.println(motors.at(2)->setGoalAngle(thirdMotor));*/
 }
 
+#ifndef TEST_MOTOR
 // Commande de l'ascenseur
 void cmdAscenseur(int nbPas)
 {
@@ -84,6 +115,8 @@ void cmdAscenseur(int nbPas)
         delayMicroseconds(ELEVATOR_TEMPO);
     }
 }
+
+#endif
 
 void loop()
 {
@@ -159,6 +192,7 @@ void loop()
             Serial.println("ok");
         }
 
+#ifndef TEST_MOTOR
         // Commande de l'ascenseur
         else if(input.startsWith("asc"))
         {
@@ -175,7 +209,7 @@ void loop()
         {
             digitalWrite(PUMP_PIN, LOW);
         }
-
+#endif
         else
         {
            Serial.printf("Commande non reconnue '%s'\n", input);
