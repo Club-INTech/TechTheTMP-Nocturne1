@@ -59,9 +59,9 @@ void setup()
 void setpos(float firstMotor, float secondMotor, float thirdMotor)
 {
     Serial.println(motors.at(0)->setGoalAngle(firstMotor));
-    delay(50);
+    delay(100);
     Serial.println(motors.at(1)->setGoalAngle(secondMotor));
-    delay(50);
+    delay(100);
     Serial.println(motors.at(2)->setGoalAngle(thirdMotor));
 }
 
@@ -76,7 +76,7 @@ void cmdAscenseur(int nbPas)
     {
         digitalWrite(DIR_PIN, HIGH);
     }
-    for (int i = 0; i<abs(nbPas); i++)
+    for (int i = 0; i<abs(nbPas); ++i)
     {
         digitalWrite(STEP_PIN, HIGH);
         delayMicroseconds(ELEVATOR_TEMPO);
