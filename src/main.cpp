@@ -16,26 +16,28 @@ static XL430* motor3 = new XL430(3,*manager);
 static std::vector<XL430*> motors{motor1,motor2,motor3};
 
 
-// Pins pour
-const uint8_t DIR_PIN = 4; // Direction
+// Pins pour l'ascenseur
 const uint8_t STEP_PIN = 2; // Vitesse
-const uint8_t RST_PIN = 3; //gris
+const uint8_t RST_PIN = 3; // Reset
+const uint8_t DIR_PIN = 4; // Direction
 const unsigned int ELEVATOR_TEMPO = 800; //gris
+
+// Pompe
+const uint8_t PUMP_PIN = 5;
 
 
 void setup()
 {
-    pinMode(13,OUTPUT);
+    pinMode(13, OUTPUT);
 
     Serial.begin(115200);
     Serial.println("Init");
 
-    digitalWrite(13,HIGH); // led de débug
+    digitalWrite(13, HIGH); // led de débug
 
     pinMode(DIR_PIN, OUTPUT);
     pinMode(STEP_PIN, OUTPUT);
     pinMode(RST_PIN, OUTPUT);
-    Serial.begin(9600);
     digitalWrite(RST_PIN, HIGH);
 
     // les moteurs fournissent du couple
@@ -43,10 +45,13 @@ void setup()
     motor2->toggleTorque(true);
     motor3->toggleTorque(true);
 
+    // Préparation du MOSFET pour la pompe
+    pinMode(PUMP_PIN, OUTPUT);
+
     Serial.println("Ready :)");
     delay(1000);
 
-    digitalWrite(13,LOW);
+    digitalWrite(13, LOW);
 }
 
 
@@ -96,22 +101,27 @@ void loop()
         }
         else if(input == "accel")
         {
-            setpos(180, 225, 135);
+            setpos(186, 55, 141);
             Serial.println("ok");
         }
         else if(input == "distributeur")
         {
-            setpos(180, 315, 225);
+            setpos(234, 56, 93);
             Serial.println("ok");
         }
         else if(input == "stockage")
         {
-            setpos(225, 180, 225+90);
+            setpos(187, 268, 83);
             Serial.println("ok");
         }
         else if(input == "sol")
         {
-            setpos(225-90, 270, 225-90);
+            setpos(272, 97, 189);
+            Serial.println("ok");
+        }
+        else if(input == "posinter")
+        {
+            setpos(208, 265, 88);
             Serial.println("ok");
         }
 
@@ -156,6 +166,15 @@ void loop()
             cmdAscenseur(nbPas);
         }
 
+        // Commande de la pompe
+        else if(input == "pompeon")
+        {
+            digitalWrite(PUMP_PIN, HIGH);
+        }
+        else if(input == "pompeoff")
+        {
+            digitalWrite(PUMP_PIN, LOW);
+        }
 
         else
         {
