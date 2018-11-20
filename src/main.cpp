@@ -20,7 +20,7 @@ static std::vector<XL430*> motors{motor1,motor2,motor3};
 const uint8_t STEP_PIN = 2; // Vitesse
 const uint8_t RST_PIN = 3; // Reset
 const uint8_t DIR_PIN = 4; // Direction
-const unsigned int ELEVATOR_TEMPO = 800;
+const unsigned int ELEVATOR_TEMPO = 800; //temporistaion entre les commandes du pas à pas
 
 // Pompe
 const uint8_t PUMP_PIN = 5;
