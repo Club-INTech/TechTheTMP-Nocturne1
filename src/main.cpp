@@ -20,7 +20,7 @@ static std::vector<XL430*> motors{motor1,motor2,motor3};
 const uint8_t STEP_PIN = 2; // Vitesse
 const uint8_t RST_PIN = 3; // Reset
 const uint8_t DIR_PIN = 4; // Direction
-const unsigned int ELEVATOR_TEMPO = 800; //gris
+const unsigned int ELEVATOR_TEMPO = 800;
 
 // Pompe
 const uint8_t PUMP_PIN = 5;
@@ -147,7 +147,7 @@ void loop()
         else if(input == "output")
         {
             Serial.println("--------------------------------");
-            Serial.printf("|  Motor 1 | Motor 2 | Motor 3 |\n");
+            Serial.println("|  Motor 1 | Motor 2 | Motor 3 |");
             float angle1 = 0.f;
             float angle2 = 0.f;
             float angle3 = 0.f;
@@ -178,7 +178,7 @@ void loop()
 
         else
         {
-           Serial.printf("Commande non reconnue '%s'\n", input);
+           Serial.println("Commande non reconnue " + input);
         }
     }
 
