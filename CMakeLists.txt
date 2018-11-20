@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
-project(ProtoBras)
+project(TechTheTMP-Nocturne1)
 
 include(CMakeListsPrivate.txt)
 
