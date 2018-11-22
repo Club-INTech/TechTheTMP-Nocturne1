@@ -20,8 +20,8 @@ static XL430* motor6 = new XL430(6,*manager);
 
 static std::vector<XL430*> motors{motor1,motor2,motor3,motor4,motor5,motor6};
 
-static char* syncAngles = new char[XL430::xl430GoalAngle.length*3];
-static SyncWrite* syncWriteData = new SyncWrite(*manager, 3, (uint16_t ) (XL430::xl430GoalAngle.address[0] | (XL430::xl430GoalAngle.address[1] << 8)), XL430::xl430GoalAngle.length);
+static char* syncAngles = new char[XL430::xl430GoalAngle.length*6];
+static SyncWrite* syncWriteData = new SyncWrite(*manager, 6, (uint16_t ) (XL430::xl430GoalAngle.address[0] | (XL430::xl430GoalAngle.address[1] << 8)), XL430::xl430GoalAngle.length);
 
 
 // Définition des différentes positions
@@ -74,14 +74,10 @@ void setup()
         mot->toggleTorque(true);
     }
 
-    syncWriteData->setMotorID(0, 1);
-    syncWriteData->setMotorID(1, 2);
-    syncWriteData->setMotorID(2, 3);
+    for(int i(0); i<6; ++i){
+        syncWriteData->setMotorID(i, i+1);
+    }
 
-    //Je n'ai aucune idée de ce que je fais...
-    syncWriteData->setMotorID(3, 4);
-    syncWriteData->setMotorID(4, 5);
-    syncWriteData->setMotorID(5, 6);
 
     Serial2.println("Ready :)");
     delay(1000);
