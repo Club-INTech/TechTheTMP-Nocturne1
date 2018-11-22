@@ -8,12 +8,12 @@
 #define _GLIBCXX_USE_C99 1
 
 
-// Liste des moteurs du bras
+// Liste des moteurs du bras 1
 static DynamixelManager* manager = new DynamixelManager(&Serial1);
 static XL430* motor1 = new XL430(1,*manager);
 static XL430* motor2 = new XL430(2,*manager);
 static XL430* motor3 = new XL430(3,*manager);
-
+// Liste des moteurs du bras 2
 static XL430* motor4 = new XL430(4,*manager);
 static XL430* motor5 = new XL430(5,*manager);
 static XL430* motor6 = new XL430(6,*manager);
@@ -37,13 +37,13 @@ static float positionIntermediaire[3] = {208.0f, 265.0f, 88.0f};
 const uint8_t STEP_PIN_1 = 2; // Vitesse
 const uint8_t RST_PIN = 3; // Reset
 const uint8_t DIR_PIN_1 = 4; // Direction
-const uint8_t STEP_PIN_2 = 7;
-const uint8_t DIR_PIN_2 = 8;
+const uint8_t STEP_PIN_2 = 6;
+const uint8_t DIR_PIN_2 = 7;
 const unsigned int ELEVATOR_TEMPO = 800; //gris
 
 // Pompe
 const uint8_t VALVE_PIN_1 = 5;
-const uint8_t VALVE_PIN_2 = 11;
+const uint8_t VALVE_PIN_2 = 8;
 #endif
 
 
