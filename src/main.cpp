@@ -14,7 +14,11 @@ static XL430* motor1 = new XL430(1,*manager);
 static XL430* motor2 = new XL430(2,*manager);
 static XL430* motor3 = new XL430(3,*manager);
 
-static std::vector<XL430*> motors{motor1,motor2,motor3};
+static XL430* motor4 = new XL430(4,*manager);
+static XL430* motor5 = new XL430(5,*manager);
+static XL430* motor6 = new XL430(6,*manager);
+
+static std::vector<XL430*> motors{motor1,motor2,motor3,motor4,motor5,motor6};
 
 static char* syncAngles = new char[XL430::xl430GoalAngle.length*3];
 static SyncWrite* syncWriteData = new SyncWrite(*manager, 3, (uint16_t ) (XL430::xl430GoalAngle.address[0] | (XL430::xl430GoalAngle.address[1] << 8)), XL430::xl430GoalAngle.length);
@@ -30,13 +34,16 @@ static float positionIntermediaire[3] = {208.0f, 265.0f, 88.0f};
 
 #ifndef TEST_MOTOR
 // Pins pour l'ascenseur
-const uint8_t STEP_PIN = 2; // Vitesse
+const uint8_t STEP_PIN_1 = 2; // Vitesse
 const uint8_t RST_PIN = 3; // Reset
-const uint8_t DIR_PIN = 4; // Direction
+const uint8_t DIR_PIN_1 = 4; // Direction
+const uint8_t STEP_PIN_2 = 7;
+const uint8_t DIR_PIN_2 = 8;
 const unsigned int ELEVATOR_TEMPO = 800; //gris
 
 // Pompe
-const uint8_t VALVE_PIN = 5;
+const uint8_t VALVE_PIN_1 = 5;
+const uint8_t VALVE_PIN_2 = 11;
 #endif
 
 
@@ -51,22 +58,30 @@ void setup()
 
 #ifndef TEST_MOTOR
     // Préparation de l'ascenseur
-    pinMode(DIR_PIN, OUTPUT);
-    pinMode(STEP_PIN, OUTPUT);
+    pinMode(DIR_PIN_1, OUTPUT);
+    pinMode(STEP_PIN_1, OUTPUT);
     pinMode(RST_PIN, OUTPUT);
+    pinMode(DIR_PIN_2, OUTPUT);
+    pinMode(STEP_PIN_2, OUTPUT);
 
     // Préparation du MOSFET pour la pompe
-    pinMode(VALVE_PIN, OUTPUT);
+    pinMode(VALVE_PIN_1, OUTPUT);
+    pinMode(VALVE_PIN_2, OUTPUT);
     digitalWrite(RST_PIN, HIGH);
 #endif
     // les moteurs fournissent du couple
-    motor1->toggleTorque(true);
-    motor2->toggleTorque(true);
-    motor3->toggleTorque(true);
+    for(auto mot:motors){
+        mot->toggleTorque(true);
+    }
 
     syncWriteData->setMotorID(0, 1);
     syncWriteData->setMotorID(1, 2);
     syncWriteData->setMotorID(2, 3);
+
+    //Je n'ai aucune idée de ce que je fais...
+    syncWriteData->setMotorID(3, 4);
+    syncWriteData->setMotorID(4, 5);
+    syncWriteData->setMotorID(5, 6);
 
     Serial2.println("Ready :)");
     delay(1000);
@@ -86,7 +101,7 @@ void prepareAngleData(unsigned int motorIndex, float angle)
     }
 }
 
-void setpos(float* positions, bool reverse) {
+void setpos(float* positions, bool reverse, int bras=1) {
    /* TODO: Tester ça
     syncWriteData->setData(0, &positions[0]);
     syncWriteData->setData(1, &positions[1]);
@@ -98,6 +113,7 @@ void setpos(float* positions, bool reverse) {
         if(reverse) {
             motorIndex = 2-motorIndex;
         }
+        motorIndex+=(bras-1)*3;
         float angle = positions[motorIndex];
         Serial2.printf("%i -> %f\n", motorIndex, angle);
         Serial2.println(motors.at(motorIndex)->setGoalAngle(angle));
@@ -107,14 +123,25 @@ void setpos(float* positions, bool reverse) {
 }
 
 // Permet de positionner le bras dans une position donnée
-void setpos(float* positions) {
-    setpos(positions, false);
+
+void setpos(float* positions, int bras=1) {
+    setpos(positions, false, bras);
 }
+
 
 #ifndef TEST_MOTOR
 // Commande de l'ascenseur
-void cmdAscenseur(int nbPas)
+void cmdAscenseur(int nbPas, int cote=1)
 {
+    uint8_t DIR_PIN, STEP_PIN;
+    if(cote==1){
+        DIR_PIN = DIR_PIN_1;
+        STEP_PIN = STEP_PIN_1;
+    }else{
+        DIR_PIN = DIR_PIN_2;
+        STEP_PIN = STEP_PIN_2;
+    }
+
     if (nbPas < 0)
     {
         digitalWrite(DIR_PIN,LOW);
@@ -218,49 +245,57 @@ void executeFromSerial() {
             // Commande de la pompe
         else if(input == "pompeon")
         {
-            digitalWrite(VALVE_PIN, LOW);
+            digitalWrite(VALVE_PIN_1, LOW);
         }
         else if(input == "pompeoff")
         {
-            digitalWrite(VALVE_PIN, HIGH);
+            digitalWrite(VALVE_PIN_1, HIGH);
         }
 #endif
         else
         {
-            Serial2.printf("Commande non reconnue '%s'\n", input);
+            Serial2.println("Commande non reconnue " + input);
         }
     }
 }
 
-void unsuck() {
-    digitalWrite(VALVE_PIN, HIGH);
+void unsuck(int cote=1) {
+    if(cote==1) {
+        digitalWrite(VALVE_PIN_1, HIGH);
+    }else{
+        digitalWrite(VALVE_PIN_2, HIGH);
+    }
     delay(500);
 }
 
-void suck() {
-    digitalWrite(VALVE_PIN, LOW);
+void suck(int cote=1){
+    if(cote==1){
+        digitalWrite(VALVE_PIN_1, LOW);
+    }else{
+        digitalWrite(VALVE_PIN_2, LOW);
+    }
     delay(500);
 }
 
-void raiseElevator(unsigned int amount) {
-    cmdAscenseur(700*amount);
+void raiseElevator(unsigned int amount, int cote=1) {
+    cmdAscenseur(700*amount, cote);
 }
 
-void lowerElevator(unsigned int amount) {
-    cmdAscenseur(-700*amount);
+void lowerElevator(unsigned int amount, int cote=1) {
+    cmdAscenseur(-700*amount, cote);
 }
 
-void autoExecute() {
-    setpos(positionDroit);
+void autoExecute(int cote=1) {
+    setpos(positionDroit, cote);
     // Prendre au sol
-    suck();
-    setpos(positionIntermediaire);
-    setpos(positionSol, true);
+    suck(cote);
+    //setpos(positionIntermediaire);
+    setpos(positionSol, true, cote);
     // Monter jusqu'à la pile et le ranger
-    setpos(positionIntermediaire);
-    setpos(positionStockage);
-    unsuck();
-    lowerElevator(1);
+    setpos(positionIntermediaire, cote);
+    setpos(positionStockage, cote);
+    unsuck(cote);
+    lowerElevator(1, cote);
 
     // A LA MAIN: Mettre devant distrib !!
     digitalWrite(13, HIGH);
@@ -268,14 +303,14 @@ void autoExecute() {
     digitalWrite(13, LOW);
 
     // Prendre 1 palet dans distrib
-    setpos(positionIntermediaire);
-    setpos(positionDistributeur);
-    suck();
+    setpos(positionIntermediaire, cote);
+    setpos(positionDistributeur, true, cote);
+    suck(cote);
     // On le stocke
-    setpos(positionIntermediaire);
-    setpos(positionStockage);
-    unsuck();
-    lowerElevator(1);
+    setpos(positionIntermediaire, cote);
+    setpos(positionStockage, cote);
+    unsuck(cote);
+    lowerElevator(1, cote);
 
     // A LA MAIN: Mettre devant accelérateur !!
     digitalWrite(13, HIGH);
@@ -283,27 +318,27 @@ void autoExecute() {
     digitalWrite(13, LOW);
 
     // Remonter et ventouser
-    raiseElevator(1);
-    suck();
+    raiseElevator(1, cote);
+    suck(cote);
 
     // Mettre le palet pour le poser dans l'accélérateur
-    setpos(positionIntermediaire);
-    setpos(positionAccelerateur);
-    unsuck();
+    setpos(positionIntermediaire, cote);
+    setpos(positionAccelerateur, cote);
+    unsuck(cote);
 
     // On remonte l'ascenseur et on prend le palet
-    setpos(positionIntermediaire);
-    setpos(positionStockage);
-    raiseElevator(1);
-    suck();
-    setpos(positionIntermediaire);
-    setpos(positionAccelerateur);
+    setpos(positionIntermediaire, cote);
+    setpos(positionStockage, cote);
+    raiseElevator(1, cote);
+    suck(cote);
+    setpos(positionIntermediaire, cote);
+    setpos(positionAccelerateur, cote);
 
     // A LA MAIN: Décaler le robot sur le côté (pour pousser les palets dans l'accélérateur)
     digitalWrite(13, HIGH);
     delay(5000);
     digitalWrite(13, LOW);
-    unsuck();
+    unsuck(cote);
 }
 
 void loop() {
