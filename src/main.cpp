@@ -20,8 +20,8 @@ static XL430* motor6 = new XL430(6,*manager);
 
 static std::vector<XL430*> motors{motor1,motor2,motor3,motor4,motor5,motor6};
 
-static char* syncAngles = new char[XL430::xl430GoalAngle.length*6];
-static SyncWrite* syncWriteData = new SyncWrite(*manager, 6, (uint16_t ) (XL430::xl430GoalAngle.address[0] | (XL430::xl430GoalAngle.address[1] << 8)), XL430::xl430GoalAngle.length);
+static char* syncAngles = new char[XL430::xl430GoalAngle.length*6]; // TODO: changer pour 6 moteurs quand ce sera appliquable
+static SyncWrite* syncWriteData = new SyncWrite(*manager, 3, (uint16_t ) (XL430::xl430GoalAngle.address[0] | (XL430::xl430GoalAngle.address[1] << 8)), XL430::xl430GoalAngle.length); // TODO: changer pour 3 moteurs quand appliquable
 
 
 // Définition des différentes positions
@@ -32,7 +32,6 @@ static float positionStockage[3] = {187.0f, 268.0f, 83.0f};
 static float positionSol[3] = {272.0f, 97.0f, 189.0f};
 static float positionIntermediaire[3] = {208.0f, 265.0f, 88.0f};
 
-#ifndef TEST_MOTOR
 // Pins pour l'ascenseur
 const uint8_t STEP_PIN_1 = 2; // Vitesse
 const uint8_t RST_PIN = 3; // Reset
@@ -44,7 +43,7 @@ const unsigned int ELEVATOR_TEMPO = 800; //gris
 // Pompe
 const uint8_t VALVE_PIN_1 = 5;
 const uint8_t VALVE_PIN_2 = 8;
-#endif
+
 
 
 void setup()
@@ -56,7 +55,6 @@ void setup()
 
     digitalWrite(13, HIGH); // led de débug
 
-#ifndef TEST_MOTOR
     // Préparation de l'ascenseur
     pinMode(DIR_PIN_1, OUTPUT);
     pinMode(STEP_PIN_1, OUTPUT);
@@ -68,7 +66,6 @@ void setup()
     pinMode(VALVE_PIN_1, OUTPUT);
     pinMode(VALVE_PIN_2, OUTPUT);
     digitalWrite(RST_PIN, HIGH);
-#endif
     // les moteurs fournissent du couple
     for(auto mot:motors){
         mot->toggleTorque(true);
@@ -98,12 +95,18 @@ void prepareAngleData(unsigned int motorIndex, float angle)
 }
 
 void setpos(float* positions, bool reverse, int bras=1) {
-   /* TODO: Tester ça
-    syncWriteData->setData(0, &positions[0]);
-    syncWriteData->setData(1, &positions[1]);
-    syncWriteData->setData(2, &positions[2]);
-    syncWriteData->send();*/
     unsigned int tempo = 500;
+    Serial2.println("Starting movement");
+
+#ifdef TEST_MOTOR
+    prepareAngleData(0, positions[0]);
+    prepareAngleData(1, positions[1]);
+    prepareAngleData(2, positions[2]);
+    syncWriteData->setData(0, &syncAngles[0]);
+    syncWriteData->setData(1, &syncAngles[1*XL430::xl430GoalAngle.length]);
+    syncWriteData->setData(2, &syncAngles[2*XL430::xl430GoalAngle.length]);
+    syncWriteData->send();
+#else
     for(unsigned int i = 0;i<3;i++) {
         unsigned int motorIndex = i;
         if(reverse) {
@@ -115,7 +118,9 @@ void setpos(float* positions, bool reverse, int bras=1) {
         Serial2.println(motors.at(motorIndex)->setGoalAngle(angle));
         delay(tempo);
     }
+#endif
     delay(tempo);
+    Serial2.println("Ending movement");
 }
 
 // Permet de positionner le bras dans une position donnée
@@ -125,7 +130,6 @@ void setpos(float* positions, int bras=1) {
 }
 
 
-#ifndef TEST_MOTOR
 // Commande de l'ascenseur
 void cmdAscenseur(int nbPas, int cote=1)
 {
@@ -154,8 +158,6 @@ void cmdAscenseur(int nbPas, int cote=1)
         delayMicroseconds(ELEVATOR_TEMPO);
     }
 }
-
-#endif
 
 void executeFromSerial() {
     if(Serial2.available())
@@ -230,7 +232,6 @@ void executeFromSerial() {
             Serial2.println("ok");
         }
 
-#ifndef TEST_MOTOR
             // Commande de l'ascenseur
         else if(input.startsWith("asc"))
         {
@@ -247,7 +248,6 @@ void executeFromSerial() {
         {
             digitalWrite(VALVE_PIN_1, HIGH);
         }
-#endif
         else
         {
             Serial2.println("Commande non reconnue " + input);
