@@ -44,6 +44,7 @@ const unsigned int ELEVATOR_TEMPO = 800; //gris
 const uint8_t VALVE_PIN_1 = 5;
 const uint8_t VALVE_PIN_2 = 8;
 
+int aParcourrir[2];
 
 
 void setup()
@@ -133,30 +134,7 @@ void setpos(float* positions, int bras=1) {
 // Commande de l'ascenseur
 void cmdAscenseur(int nbPas, int cote=1)
 {
-    uint8_t DIR_PIN, STEP_PIN;
-    if(cote==1){
-        DIR_PIN = DIR_PIN_1;
-        STEP_PIN = STEP_PIN_1;
-    }else{
-        DIR_PIN = DIR_PIN_2;
-        STEP_PIN = STEP_PIN_2;
-    }
-
-    if (nbPas < 0)
-    {
-        digitalWrite(DIR_PIN,LOW);
-    }
-    else
-    {
-        digitalWrite(DIR_PIN, HIGH);
-    }
-    for (int i = 0; i<abs(nbPas); ++i)
-    {
-        digitalWrite(STEP_PIN, HIGH);
-        delayMicroseconds(ELEVATOR_TEMPO);
-        digitalWrite(STEP_PIN, LOW);
-        delayMicroseconds(ELEVATOR_TEMPO);
-    }
+    aParcourrir[cote-1]+=nbPas;
 }
 
 void executeFromSerial() {
@@ -337,13 +315,50 @@ void autoExecute(int cote=1) {
     unsuck(cote);
 }
 
+
+bool actAscenseurs(){
+    uint8_t DIR_PIN, STEP_PIN;
+    for(int cote(1); cote<=2; ++cote) {
+        if (cote == 1) {
+            DIR_PIN = DIR_PIN_1;
+            STEP_PIN = STEP_PIN_1;
+        } else {
+            DIR_PIN = DIR_PIN_2;
+            STEP_PIN = STEP_PIN_2;
+        }
+
+        if(aParcourrir[cote-1]>0){
+            digitalWrite(DIR_PIN, HIGH);
+            int parcourru=0;
+            while(parcourru<aParcourrir[cote-1] && parcourru<10){
+                digitalWrite(STEP_PIN, HIGH);
+                delay(ELEVATOR_TEMPO);
+                digitalWrite(STEP_PIN, LOW);
+                delay(ELEVATOR_TEMPO);
+                ++parcourru;
+            }
+        }else{
+            digitalWrite(DIR_PIN, LOW);
+            int parcourru=0;
+            while(parcourru>aParcourrir[cote-1] && parcourru>-10){
+                digitalWrite(STEP_PIN, HIGH);
+                delay(ELEVATOR_TEMPO);
+                digitalWrite(STEP_PIN, LOW);
+                delay(ELEVATOR_TEMPO);
+                --parcourru
+            }
+        }
+
+    }
+}
+
 void loop() {
 #ifndef COMMANDE_SERIAL
     autoExecute();
 #else
     executeFromSerial();
 #endif
-
+    actAscenseurs();
     delay(100);
     digitalWrite(13, LOW);
 }
