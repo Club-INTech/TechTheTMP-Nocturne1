@@ -45,7 +45,6 @@ const uint8_t VALVE_PIN_1 = 5;
 const uint8_t VALVE_PIN_2 = 8;
 
 
-
 void setup()
 {
     pinMode(13, OUTPUT);
@@ -67,7 +66,7 @@ void setup()
     pinMode(VALVE_PIN_2, OUTPUT);
     digitalWrite(RST_PIN, HIGH);
     // les moteurs fournissent du couple
-    for(auto mot:motors){
+    for(auto mot:motors) {
         mot->toggleTorque(true);
     }
 
@@ -134,10 +133,10 @@ void setpos(float* positions, int bras=1) {
 void cmdAscenseur(int nbPas, int cote=1)
 {
     uint8_t DIR_PIN, STEP_PIN;
-    if(cote==1){
+    if (cote==1) {
         DIR_PIN = DIR_PIN_1;
         STEP_PIN = STEP_PIN_1;
-    }else{
+    } else {
         DIR_PIN = DIR_PIN_2;
         STEP_PIN = STEP_PIN_2;
     }
@@ -150,6 +149,7 @@ void cmdAscenseur(int nbPas, int cote=1)
     {
         digitalWrite(DIR_PIN, HIGH);
     }
+    Serial2.printf("Envoi de la commande sur asc: %i sur (%i, %i) (dir, step)... ", nbPas, DIR_PIN, STEP_PIN);
     for (int i = 0; i<abs(nbPas); ++i)
     {
         digitalWrite(STEP_PIN, HIGH);
@@ -157,6 +157,7 @@ void cmdAscenseur(int nbPas, int cote=1)
         digitalWrite(STEP_PIN, LOW);
         delayMicroseconds(ELEVATOR_TEMPO);
     }
+    Serial2.println("Fin");
 }
 
 void executeFromSerial() {
