@@ -125,11 +125,9 @@ void setpos(float* positions, bool reverse, int bras=1) {
 }
 
 // Permet de positionner le bras dans une position donnée
-
 void setpos(float* positions, int bras=1) {
     setpos(positions, false, bras);
 }
-
 
 // Commande de l'ascenseur
 void cmdAscenseur(int nbPas, int cote=1)
@@ -315,7 +313,6 @@ void autoExecute(int cote=1) {
     unsuck(cote);
 }
 
-
 bool actAscenseurs(){
     uint8_t DIR_PIN, STEP_PIN;
     for(int cote(1); cote<=2; ++cote) {
@@ -330,26 +327,28 @@ bool actAscenseurs(){
         if(aParcourrir[cote-1]>0){
             digitalWrite(DIR_PIN, HIGH);
             int parcourru=0;
-            while(parcourru<aParcourrir[cote-1] && parcourru<10){
+            while(aParcourrir[cote-1]>0 && parcourru<10){
                 digitalWrite(STEP_PIN, HIGH);
                 delay(ELEVATOR_TEMPO);
                 digitalWrite(STEP_PIN, LOW);
                 delay(ELEVATOR_TEMPO);
                 ++parcourru;
+                --aParcourrir[cote-1];
             }
         }else{
             digitalWrite(DIR_PIN, LOW);
             int parcourru=0;
-            while(parcourru>aParcourrir[cote-1] && parcourru>-10){
+            while(parcourru>aParcourrir[cote-1]<0 && parcourru>-10){
                 digitalWrite(STEP_PIN, HIGH);
                 delay(ELEVATOR_TEMPO);
                 digitalWrite(STEP_PIN, LOW);
                 delay(ELEVATOR_TEMPO);
-                --parcourru
+                --parcourru;
+                ++aParcourrir[cote-1];
             }
         }
-
     }
+    return aParcourrir[0]==0 && aParcourrir[1]==0;
 }
 
 void loop() {
