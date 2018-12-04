@@ -76,7 +76,11 @@ void executeFromSerial() {
         else if(input.startsWith("asc"))
         {
             int nbPas = input.substring(3).toInt();
-            cmdAscenseur(nbPas, 1);
+            if(nbPas < 0) {
+                lowerElevator((unsigned int)(-nbPas), 1);
+            } else {
+                raiseElevator((unsigned int)nbPas, 1);
+            }
         }
 
             // Commande de la pompe
