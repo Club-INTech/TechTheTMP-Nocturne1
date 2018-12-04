@@ -88,8 +88,7 @@ void prepareAngleData(unsigned int motorIndex, float angle)
     uint32_t targetAngleValue = (uint32_t)(angle/0.088);
     char* parameter = &syncAngles[motorIndex*4];
 
-    for(int i = 0;i<XL430::xl430GoalAngle.length;i++)
-    {
+    for(int i = 0;i<XL430::xl430GoalAngle.length;i++){
         parameter[i] = targetAngleValue & 0xFF;
         targetAngleValue = targetAngleValue >> 8;
     }
@@ -338,7 +337,7 @@ bool actAscenseurs(){
         }else{
             digitalWrite(DIR_PIN, LOW);
             int parcourru=0;
-            while(parcourru>aParcourrir[cote-1]<0 && parcourru>-10){
+            while(aParcourrir[cote-1]<0 && parcourru>-10){
                 digitalWrite(STEP_PIN, HIGH);
                 delay(ELEVATOR_TEMPO);
                 digitalWrite(STEP_PIN, LOW);
