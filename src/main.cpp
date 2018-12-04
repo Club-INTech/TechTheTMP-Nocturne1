@@ -34,15 +34,15 @@ static float positionIntermediaire[3] = {208.0f, 265.0f, 88.0f};
 
 // Pins pour l'ascenseur
 const uint8_t STEP_PIN_1 = 2; // Vitesse
-const uint8_t RST_PIN = 3; // Reset
+const uint8_t RST_PIN = 14; // Reset
 const uint8_t DIR_PIN_1 = 4; // Direction
-const uint8_t STEP_PIN_2 = 6;
-const uint8_t DIR_PIN_2 = 7;
+const uint8_t STEP_PIN_2 = 8;
+const uint8_t DIR_PIN_2 = 3;
 const unsigned int ELEVATOR_TEMPO = 800; //gris
 
 // Pompe
 const uint8_t VALVE_PIN_1 = 5;
-const uint8_t VALVE_PIN_2 = 8;
+const uint8_t VALVE_PIN_2 = 14;
 
 
 void setup()
