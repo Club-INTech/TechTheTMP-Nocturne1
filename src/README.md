@@ -7,7 +7,7 @@ Script automatique de mouvement du robot, juste pour le test pour le moment
 
 commande_serial.cpp/h
 ----
-Script qui attend des instructions de la série (Serial2) pour contrôler le prototype
+Script qui attend des instructions de la série (DebugSerial) pour contrôler le prototype
 
 constantes.h
 ----

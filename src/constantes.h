@@ -1,6 +1,9 @@
 #include "Arduino.h"
 #ifndef _POSITIONS_H
 #define _POSITIONS_H
+
+static HardwareSerial DebugSerial = Serial2;
+
 // Définition des différentes positions
 static float positionDroit[3] = {180.0f,180.0f,180.0f};
 static float positionAccelerateur[3] = {186.0f, 55.0f, 141.0f};

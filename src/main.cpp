@@ -25,8 +25,8 @@ void setup()
 {
     pinMode(13, OUTPUT);
 
-    Serial2.begin(115200);
-    Serial2.println("Init");
+    DebugSerial.begin(115200);
+    DebugSerial.println("Init");
 
     initPins();
     // les moteurs fournissent du couple
@@ -38,7 +38,7 @@ void setup()
         syncWriteData->setMotorID(i, i+1);
     }
 
-    Serial2.println("Ready :)");
+    DebugSerial.println("Ready :)");
     delay(1000);
 
     digitalWrite(13, LOW);

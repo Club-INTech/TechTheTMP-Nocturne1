@@ -16,17 +16,16 @@ void prepareAngleData(unsigned int motorIndex, float angle)
 
 void setpos(float* positions, int side=1) {
     unsigned int tempo = 500;
-    Serial2.println("Starting movement");
+    DebugSerial.println("Starting movement");
 
-    prepareAngleData(0, positions[0]);
-    prepareAngleData(1, positions[1]);
-    prepareAngleData(2, positions[2]);
-    syncWriteData->setData(0, &syncAngles[0]);
-    syncWriteData->setData(1, &syncAngles[1*XL430::xl430GoalAngle.length]);
-    syncWriteData->setData(2, &syncAngles[2*XL430::xl430GoalAngle.length]);
+    const unsigned int servoInArmCount = 3;
+    for (unsigned int i = 0; i < servoInArmCount; ++i) {
+        prepareAngleData(i, positions[i]);
+        syncWriteData->setData(i, &syncAngles[i*XL430::xl430GoalAngle.length]);
+    }
     syncWriteData->send();
     delay(tempo);
-    Serial2.println("Ending movement");
+    DebugSerial.println("Ending movement");
 }
 
 // Commande de l'ascenseur
@@ -49,7 +48,7 @@ void cmdAscenseur(int nbPas, int cote=1)
     {
         digitalWrite(DIR_PIN, HIGH);
     }
-    Serial2.printf("Envoi de la commande sur asc: %i sur (%i, %i) (dir, step)... ", nbPas, DIR_PIN, STEP_PIN);
+    DebugSerial.printf("Envoi de la commande sur asc: %i sur (%i, %i) (dir, step)... ", nbPas, DIR_PIN, STEP_PIN);
     for (int i = 0; i<abs(nbPas); ++i)
     {
         digitalWrite(STEP_PIN, HIGH);
@@ -57,7 +56,7 @@ void cmdAscenseur(int nbPas, int cote=1)
         digitalWrite(STEP_PIN, LOW);
         delayMicroseconds(ELEVATOR_TEMPO);
     }
-    Serial2.println("Fin");
+    DebugSerial.println("Fin");
 }
 
 void unsuck(int side=1) {
