@@ -39,4 +39,14 @@ void raiseElevator(unsigned int, int);
 
 // Baisses l'ascenseur (quantité, côté)
 void lowerElevator(unsigned int, int);
+
+// Fais en sorte que le bras suive un mouvement (positions, nombre de positions, côté)
+void makeArmFollowSteps(float*[], unsigned int, int);
+
+// Déplaces le bras dans la position de stockage vers distributeur (côté)
+void moveFromStorageToDispenser(int);
+
+// Déplaces le bras dans la position de distributeur vers stockage (côté)
+void moveFromDispenserToStorage(int);
+
 #endif //_ROBOT_H

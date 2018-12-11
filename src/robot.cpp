@@ -19,6 +19,10 @@ void setpos(float* positions, int side=1) {
     DebugSerial.println("Starting movement");
 
     const unsigned int servoInArmCount = 3;
+
+    for(int i = 0; i < servoInArmCount; ++i) {
+        syncWriteData->setMotorID(i, ((side-1)*3)+i+1);
+    }
     for (unsigned int i = 0; i < servoInArmCount; ++i) {
         prepareAngleData(i, positions[i]);
         syncWriteData->setData(i, &syncAngles[i*XL430::xl430GoalAngle.length]);
@@ -83,4 +87,18 @@ void raiseElevator(unsigned int amount, int side=1) {
 
 void lowerElevator(unsigned int amount, int side=1) {
     cmdAscenseur(-700*amount, side);
+}
+
+void makeArmFollowSteps(float* positions[], unsigned int count, int side = 1) {
+    for (int i = 0; i < count; ++i) {
+        setpos(positions[i], side);
+    }
+}
+
+void moveFromStorageToDispenser(int side = 1) {
+    makeArmFollowSteps(stepsFromStorageToDistrib, 4, side);
+}
+
+void moveFromDispenserToStorage(int side = 1) {
+    makeArmFollowSteps(stepsFromDistribToStorage, 4, side);
 }

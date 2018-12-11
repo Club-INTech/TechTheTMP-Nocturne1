@@ -19,12 +19,10 @@ void autoStepLoop(int side=1) {
     digitalWrite(13, LOW);
 
     // Prendre 1 palet dans distrib
-    setpos(positionIntermediaire, side);
-    setpos(positionDistributeur, side);
+    moveFromStorageToDispenser(side);
     suck(side);
     // On le stocke
-    setpos(positionIntermediaire, side);
-    setpos(positionStockage, side);
+    moveFromDispenserToStorage(side);
     unsuck(side);
     lowerElevator(1, side);
 

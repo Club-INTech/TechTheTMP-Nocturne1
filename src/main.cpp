@@ -25,6 +25,7 @@ void setup()
 {
     pinMode(13, OUTPUT);
 
+    Serial.begin(115200);
     DebugSerial.begin(115200);
     DebugSerial.println("Init");
 
@@ -34,7 +35,7 @@ void setup()
         mot->toggleTorque(true);
     }
 
-    for(int i = 0; i < 6; ++i) {
+    for(int i = 0; i < 3; ++i) {
         syncWriteData->setMotorID(i, i+1);
     }
 
@@ -45,12 +46,25 @@ void setup()
 }
 
 void loop() {
+
 #ifndef COMMANDE_SERIAL
-    autoExecuteStep();
+    autoStepLoop(1);
 #else
     executeFromSerial();
 #endif
 
     delay(100);
     digitalWrite(13, LOW);
+    /*if(DebugSerial.available()) {
+        digitalWrite(13, HIGH);
+        delay(50);
+        digitalWrite(13, LOW);
+        delay(50);
+        digitalWrite(13, HIGH);
+        String s = DebugSerial.readString(100);
+        DebugSerial.printf("Roger '%s'\n", s.c_str());
+        delay(100);
+        digitalWrite(13, LOW);
+    }
+    delay(200);*/
 }
