@@ -7,11 +7,11 @@ static HardwareSerial& DebugSerial = Serial2;
 // Définition des différentes positions
 static float positionDroit[3] = {180.0f,180.0f,180.0f};
 static float positionAccelerateur[3] = {186.0f, 55.0f, 141.0f};
-static float positionDistributeur[3] = {251.0f, 125.0f, 142.0f};
-static float positionPreDistributeur[3] = {223.0f, 56.0f, 100.0f};
-static float positionStockage[3] = {190.0f, 271.0f, 84.0f};
+static float positionStockage[3] = {174.50f, 255.64f, 80.87f};
+static float positionIntermediaire[3] = {195.18f, 249.83f, 82.19f};
+static float positionPreDistributeur[3] = {329.41f, 270.77f, 90.57f};
+static float positionDistributeur[3] = {295.77f, 216.30f, 195.18f};
 static float positionSol[3] = { /*Valeur de test:*/ 278.0f /*272.0f*/, 97.0f, 189.0f};
-static float positionIntermediaire[3] = {223.0f, 270.0f, 100.0f};
 static float* stepsFromStorageToDistrib[] = {
         positionStockage, positionIntermediaire, positionPreDistributeur, positionDistributeur
 };
