@@ -2,6 +2,10 @@
 
 #define _GLIBCXX_USE_C99 1
 
+void initManager() {
+
+}
+
 void prepareAngleData(unsigned int motorIndex, float angle)
 {
     uint32_t targetAngleValue = (uint32_t)(angle/0.088);

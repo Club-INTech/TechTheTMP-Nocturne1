@@ -6,7 +6,7 @@ int side = 1;
 void executeFromSerial() {
     if(DebugSerial.available())
     {
-        String input = DebugSerial.readString(50).toLowerCase(); // lit une commande
+        String input = DebugSerial.readString(100).toLowerCase(); // lit une commande
         digitalWrite(13, HIGH);
 
         delay(2000);
@@ -67,6 +67,29 @@ void executeFromSerial() {
         else if(input == "distrib2stock")
         {
             moveFromDispenserToStorage(side);
+        }
+        else if(input.startsWith("couple"))
+        {
+            uint8_t motorID = (uint8_t) input.substring(6).toInt();
+            float torque;
+            motors.at(motorID-1)->getCurrentTorque(torque);
+            DebugSerial.printf("Couple (moteur %i) = %f\n", motorID, torque);
+        }
+        else if(input == "testforce")
+        {
+            float cb;
+            motor2->getCurrentTorque(cb);
+            cb *= 840.0; // N.mm
+            float theta1;
+            motor1->getCurrentAngle(theta1);
+            float theta2;
+            motor2->getCurrentAngle(theta2);
+            float theta = theta1-90.0f + theta2 - 90.0f;
+            double cos0 = cos(theta*3.14/180);
+            double sin0 = sin(theta*3.14/180);
+            double force = (cb - 50-72-1.6*82*cos0)/(-82*sin0);
+            DebugSerial.printf("Theta = %f\n", theta);
+            DebugSerial.printf("Force = %f\n", force);
         }
 
             // Donne les angles des moteurs à un moment donné
